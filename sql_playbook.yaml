@@ -1,0 +1,74 @@
+---
+- name: install / config MySQL cluster
+  hosts: sql
+  become: true
+  tasks:
+
+    - name: apt update
+      apt:
+        update_cache: true
+
+
+    - name: Install GNUPG
+      apt:
+        name: gnupg
+        state: present
+
+    - name: Add MySQL GPG key
+      apt_key:
+        url: https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
+        state: present
+
+    - name: Add MySQL APT repository
+      apt_repository:
+        repo: deb http://repo.mysql.com/apt/debian/ buster mysql-8.0
+        state: present
+
+    - name: apt update
+      apt:
+        update_cache: true
+
+    - name: Install MySQL packages
+      apt:
+        name:
+          - mysql-server
+          - mysql-client
+        state: present
+
+    - name: Create var - log - mysql directory
+      file:
+        path: /var/log/mysql
+        state: directory
+        owner: mysql
+        group: mysql
+
+    - name: Create var - lib - mysql directory
+      file:
+        path: /var/lib/mysql
+        state: directory
+        owner: mysql
+        group: mysql
+
+    - name: Create mysqld.log file
+      file:
+        path: /var/log/mysqld.log
+        state: touch
+        owner: mysql
+        group: mysql
+
+    - name: Configure MySQL
+      copy:
+        content: |
+          [mysqld]
+          bind-address=0.0.0.0
+          server-id={{ '1' if inventory_hostname == '130.193.38.83' else '2' }}
+          log_bin=/var/log/mysql/mybin.log
+          log-error=/var/log/mysqld.log
+          pid-file=/var/run/mysqld/mysqld.pid
+        dest: /etc/my.cnf
+
+
+    - name: Restart MySQL
+      systemd:
+        name: mysql
+        state: restarted
