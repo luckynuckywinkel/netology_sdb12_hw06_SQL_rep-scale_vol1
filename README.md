@@ -55,6 +55,10 @@ ALTER USER 'root'@'localhost' IDENTIFIED WITH 'mysql_native_password' BY 'strong
   - Создадим на мастере базу test_database и проверим работоспособность кластера:
 
 
+![sql2](img/6.JPG)   
+
+![sql2](img/7.JPG) 
+
 
 
 
